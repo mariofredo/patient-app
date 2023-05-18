@@ -28,7 +28,7 @@ $container->set(
                 'host'     => 'localhost',
                 'username' => 'root',
                 'password' => '',
-                'dbname'   => 'zicare_db',
+                'dbname'   => 'patient_app_db',
             ]
         );
     }
@@ -73,6 +73,51 @@ $app->get('/api/patients', function() use ($app) {
         'message' => "success found patient with the requested id"
       ),
       'result' => $data
+      ));
+  }
+
+  return $response;
+});
+
+$app->get('/api/patients/search/{name}', function($name) use ($app) {
+  $phql = "SELECT * FROM MyApp\Models\Patients WHERE name LIKE :name: ORDER BY id ASC";
+  $values = array('name' => '%' . $name . '%');
+  $patients = $app -> modelsManager -> executeQuery($phql, $values);
+  $response = new Response();
+
+  if($patients == false){
+    $response->setStatusCode(404, 'Not Found');
+    $response->setJsonContent(
+      array(
+        'status' => array(
+          'code' => 404,
+          'response' => 'failed',
+          'message' => 'failed found patient with the requested id'
+        ),
+      )
+    );
+  }
+  else {
+    $data = array();
+    foreach ($patients as $patient) {
+      $data[] = array(
+        'id' => $patient->id,
+        'name' => $patient->name,
+        'sex' => $patient->sex,
+        'religion' => $patient->religion,
+        'phone' => $patient->phone,
+        'address' => $patient->address,
+        'nik' => $patient->nik
+      );
+    }
+
+    $response->setJsonContent(array(
+      'status' => array(
+        'code' => 200,
+        'response' => "success",
+        'message' => "success found patient with the requested id"
+      ),
+      'result' => $data
     ));
   }
 
@@ -88,6 +133,7 @@ $app->get('/api/patients/{id:[0-9]+}', function($id) use ($app) {
 
   if($patient == false)
   {
+    $response->setStatusCode(404, 'Not Found');
     $response->setJsonContent(
       array(
         'status' => array(
@@ -159,6 +205,7 @@ $app->post('/api/patients', function() use ($app) {
   else 
   {
     $errors = array();
+    $response->setStatusCode(409, 'Conflict');
     foreach ($result->getMessages() as $message ) {
       $errors[] = $message ->getMessage();
     };
@@ -209,6 +256,7 @@ $app->put('/api/patients/{id:[0-9]+}', function($id) use ($app) {
   else 
   {
     $errors = array();
+    $response->setStatusCode(409, 'Conflict');
     foreach ($result->getMessages() as $message ) {
       $errors[] = $message ->getMessage();
     };

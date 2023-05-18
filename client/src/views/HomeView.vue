@@ -1,7 +1,24 @@
 <template>
   <div class="d-flex container flex-column justify-content-center align-items-center">
-    <h2>Patient List</h2>
-    <div class="container bg-light rounded-3">
+    <div class="container bg-light rounded-3 my-4">
+      <h2 class="text-center">Patient List</h2>
+      <div class="d-flex justify-content-center mt-2">
+        <div class="w-50">
+          <form @submit.prevent="loadPatient()" class="d-flex flex-row justify-content-center">
+            <input
+              class="form-control"
+              type="text"
+              v-model="name"
+              placeholder="Search patient name...."
+            />
+            <button class="btn btn-success ms-2" type="submit">Search</button>
+          </form>
+          <!-- <button class="btn btn-success ms-2" type="button" @click.prevent="loadPatient()">
+            Search
+          </button> -->
+        </div>
+      </div>
+      <hr />
       <div class="listContainer overflow-auto">
         <table class="table">
           <thead class="sticky-top bg-light">
@@ -55,8 +72,22 @@
           <div class="ms-3">NIK: {{ this.patient.nik }}</div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @click.prevent="deletePatient(this.patient.id)">Delete</button>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click.prevent="goToEditForm()">Edit</button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            data-bs-dismiss="modal"
+            @click.prevent="deletePatient(this.patient.id)"
+          >
+            Delete
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-dismiss="modal"
+            @click.prevent="goToEditForm()"
+          >
+            Edit
+          </button>
         </div>
       </div>
     </div>
@@ -69,6 +100,11 @@ import { usePatientStore } from '../stores/patient'
 import TableItem from '../components/TableItem.vue'
 export default {
   name: 'HomeView',
+  data() {
+    return {
+      name: ''
+    }
+  },
   components: {
     TableItem
   },
@@ -77,21 +113,26 @@ export default {
   },
   methods: {
     ...mapActions(usePatientStore, ['getPatients', 'deletePatientData']),
-    async deletePatient(){
-        await this.deletePatientData(this.patient.id);
+    async loadPatient() {
+      await this.getPatients(this.name)
+      try {
+      } catch (error) {}
     },
-    async goToEditForm(){
+    async deletePatient() {
+      await this.deletePatientData(this.patient.id)
+    },
+    async goToEditForm() {
       this.$router.push(`/patient/edit/${this.patient.id}`)
     }
   },
   async created() {
-    await this.getPatients()
-  },
+    await this.loadPatient()
+  }
 }
 </script>
 
 <style>
 .listContainer {
-  height: 75vh !important;
+  height: 70vh !important;
 }
 </style>

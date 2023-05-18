@@ -2,7 +2,8 @@
   <div class="container vh-100 d-flex flex-column align-items-center mt-5">
     <div class="w-50 d-flex flex-column bg-light rounded-3">
       <div class="col-12 px-3 pt-3">
-        <h2 class="text-center">Add Patient</h2>
+        <h2 v-if="this.$route.name == 'addPatient'" class="text-center">Add Patient</h2>
+        <h2 v-else class="text-center">Edit Patient</h2>
         <hr />
         <div class="row">
           <div class="col-6 mb-3">
@@ -39,7 +40,14 @@
           </div>
         </div>
       </div>
-      <button class="btn btn-primary mx-3 mb-3" @click.prevent="addPatient()">Create</button>
+      <button
+        v-if="this.$route.name == 'addPatient'"
+        class="btn btn-primary mx-3 mb-3"
+        @click.prevent="addPatient()"
+      >
+        Create
+      </button>
+      <button v-else class="btn btn-primary mx-3 mb-3" @click.prevent="editPatient()">Edit</button>
     </div>
   </div>
 </template>
@@ -56,55 +64,83 @@ export default {
       religion: '',
       phone: '',
       address: '',
-      nik: ''
+      nik: '',
+      id: ''
     }
   },
   computed: {
     ...mapState(usePatientStore, ['patient'])
-  },  
-  async created(){
-    if(this.$route.name == "editPatient"){
-      const id = this.$route.params.id;
-      await this.getPatientDetail(id);
+  },
+  async created() {
+    if (this.$route.name == 'editPatient') {
+      this.id = this.$route.params.id
+      await this.getPatientDetail(this.id)
       this.name = this.patient.name
-        this.sex = this.patient.sex
-        this.religion = this.patient.religion
-        this.phone = this.patient.phone
-        this.address = this.patient.address
-        this.nik = this.patient.nik
-    }else {
-      this.name = ""
-        this.sex = ""
-        this.religion = ""
-        this.phone = ""
-        this.address = ""
-        this.nik = ""
+      this.sex = this.patient.sex
+      this.religion = this.patient.religion
+      this.phone = this.patient.phone
+      this.address = this.patient.address
+      this.nik = this.patient.nik
+    } else {
+      this.name = ''
+      this.sex = ''
+      this.religion = ''
+      this.phone = ''
+      this.address = ''
+      this.nik = ''
     }
   },
   methods: {
-    ...mapActions(usePatientStore, ['createPatientData', 'getPatientDetail']),
+    ...mapActions(usePatientStore, ['createPatientData', 'editPatientData', 'getPatientDetail']),
     async addPatient() {
-      const payload = {
-        name: this.name,
-        sex: this.sex,
-        religion: this.religion,
-        phone: this.phone,
-        address: this.address,
-        nik: this.nik
-      }
-      const res = await this.createPatientData(payload)
-      if(res.status.code == 201){
-        this.$router.push('/')
-      } else {
-        this.name = ""
-        this.sex = ""
-        this.religion = ""
-        this.phone = ""
-        this.address = ""
-        this.nik = ""
+      try {
+        const payload = {
+          name: this.name,
+          sex: this.sex,
+          religion: this.religion,
+          phone: this.phone,
+          address: this.address,
+          nik: this.nik
+        }
+        const res = await this.createPatientData(payload)
+        if (res.status.code == 201) {
+          this.name = ''
+          this.sex = ''
+          this.religion = ''
+          this.phone = ''
+          this.address = ''
+          this.nik = ''
+          this.$router.push('/')
+        }
+      } catch (error) {
+        // console.log(error)
       }
     },
-    
+    async editPatient() {
+      try {
+        this.id = this.$route.params.id
+        const payload = {
+          name: this.name,
+          sex: this.sex,
+          religion: this.religion,
+          phone: this.phone,
+          address: this.address,
+          nik: this.nik
+        }
+        const res = await this.editPatientData(this.id, payload)
+        if (res.status.code == 200) {
+          this.name = ''
+          this.sex = ''
+          this.religion = ''
+          this.phone = ''
+          this.address = ''
+          this.nik = ''
+          this.$router.push('/')
+        }
+      } catch (error) {
+        // console.log(error)
+      }
+    }
   }
 }
 </script>
