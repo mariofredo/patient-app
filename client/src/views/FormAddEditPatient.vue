@@ -68,6 +68,16 @@ export default {
       id: ''
     }
   },
+  watch: {
+    $route() {
+      this.name = ''
+      this.sex = ''
+      this.religion = ''
+      this.phone = ''
+      this.address = ''
+      this.nik = ''
+    }
+  },
   computed: {
     ...mapState(usePatientStore, ['patient'])
   },
