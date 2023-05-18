@@ -1,4 +1,4 @@
-# Zi.Care-Technical-Test
+# Patient-App
 
 ## Server
 <hr>
